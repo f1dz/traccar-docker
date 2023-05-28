@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  traccar:
+    container_name: traccar
+    image: traccar/traccar:debian
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    volumes:
+      - ./traccar/logs:/opt/traccar/logs:rw
+      - ./traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+    ports:
+      - 80:8002
+      - 5000-5150:5000-5150/udp
+    networks:
+      - traccarnet
+  
+  mysql:
+    image: mariadb:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=traccar
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    networks:
+      - traccarnet
+
+networks:
+  traccarnet:
+    driver: bridge
+    enable_ipv6: false
